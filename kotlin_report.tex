@@ -1,0 +1,422 @@
+\documentclass[12pt,a4paper,oneside]{book}
+\usepackage[utf8]{vietnam}
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage{fancyhdr}
+\usepackage[vietnamese]{babel}
+\usepackage{titlesec}
+\usepackage{titletoc}
+\usepackage{listings}
+\usepackage[unicode,bookmarks=true]{hyperref}
+\usepackage{bookmark}
+\usepackage[left=3cm,right=2cm,top=2.5cm,bottom=3cm]{geometry}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{varwidth}
+\usepackage{float}
+\usepackage{color}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage[linesnumbered,lined,ruled,resetcount, algochapter]{algorithm2e}
+\usepackage{tabularx}
+\usepackage{scrfontsizes}
+\usepackage{longtable}
+\usepackage{setting/bkthesis}
+
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{10mm}
+\renewcommand{\baselinestretch}{1.31}
+\graphicspath{{images/}}
+
+\newtheorem{definition}{Định nghĩa}
+
+\titlecontents{chapter}%
+[0pt]%
+{\vspace{1ex}}%
+{\bfseries Chương \thecontentslabel\quad}%
+{\bfseries}%
+{\bfseries\hfill\contentspage}
+
+\let\chapappname\chaptername
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+% Định nghĩa highlighting cho Kotlin
+\lstdefinelanguage{Kotlin}{
+  keywords={package, as, typealias, this, super, val, var, fun, for, null, true, false, is, in, throw, return, break, continue, object, if, try, else, while, do, when, interface, class, enum, object, override, public, private, internal, protected, catch, finally, out, ref, vararg, by, constructor, init, companion, lateinit, data, inline, noinline, tailrec, external, annotation, crossinline, const, operator, infix, suspend, sealed, abstract, open, final},
+  ndkeywords={@Deprecated, @JvmName, @JvmStatic, @JvmOverloads, @JvmField, @Throws, Iterable, Int, Integer, Short, Byte, Long, Double, Float, String, Runnable, Array, List, Map, Set, Collection, StringBuilder},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[s]{"""*}{*"""},
+}
+
+\lstset{
+  language=Kotlin,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywordstyle=\color{mauve},
+  commentstyle=\color{dkgreen}\itshape,
+  stringstyle=\color{red},
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b,
+  tabsize=2
+}
+
+\renewcommand{\lstlistingname}{Source}
+\renewcommand\thechapter{\arabic{chapter}}
+\renewcommand\thesection{\thechapter.\arabic{section}}
+\renewcommand\thesubsection{\thesection.\arabic{subsection}}
+\renewcommand{\thetable}{\thechapter.\arabic{table}}
+\renewcommand{\thefigure}{\thechapter.\arabic{figure}}
+\renewcommand{\thealgocf}{\thechapter.\arabic{algocf}}
+\renewcommand{\thedefinition}{\thechapter.\arabic{definition}}
+
+\begin{document}
+
+\renewcommand{\thelstlisting}{\thechapter.\arabic{lstlisting}}
+
+\pagestyle{plain}
+\frontmatter
+
+\input{cover_page}
+
+\tableofcontents
+
+\newpage
+\clearpage
+
+\chapter*{Thuật ngữ}
+\addcontentsline{toc}{chapter}{Thuật ngữ}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Từ viết tắt}} & \multicolumn{1}{c|}{\textbf{Từ đầy đủ}} & \multicolumn{1}{c|}{\textbf{Ý nghĩa}} \\ \hline
+JVM & Java Virtual Machine & Máy ảo Java \\ \hline
+IDE & Integrated Development Environment & Môi trường phát triển tích hợp \\ \hline
+FP & Functional Programming & Lập trình hàm \\ \hline
+OOP & Object-Oriented Programming & Lập trình hướng đối tượng \\ \hline
+API & Application Programming Interface & Giao diện lập trình ứng dụng \\ \hline
+DSL & Domain-Specific Language & Ngôn ngữ chuyên biệt cho miền \\ \hline
+\end{tabular}
+\end{table}
+
+\newpage
+\clearpage
+
+\chapter*{Tóm tắt}
+\addcontentsline{toc}{chapter}{Tóm tắt}
+\changefontsizes[16pt]{13pt}
+
+Báo cáo này phân tích ngôn ngữ lập trình Kotlin từ góc độ nguyên lý ngôn ngữ lập trình (Programming Language Principles). Kotlin là ngôn ngữ hiện đại được JetBrains phát triển, chạy trên JVM và đã trở thành ngôn ngữ chính thức cho Android development.
+
+Báo cáo tập trung vào các khía cạnh: triết lý thiết kế (pragmatic, concise, safe, interoperable), hệ thống kiểu, null safety, lập trình hàm, quản lý trạng thái, xử lý lỗi, đệ quy, generics, extension functions, DSLs, coroutines và khả năng tương tác với Java.
+
+\vspace{-0.5cm}
+\begin{flushleft}
+  \textit{\textbf{Từ khóa:} Kotlin, Programming Language Principles, Type System, Null Safety, Functional Programming, JVM, Java Interoperability}
+\end{flushleft}
+
+\newpage
+\clearpage
+
+\listoffigures
+\addcontentsline{toc}{chapter}{\listfigurename}
+
+\newpage
+\clearpage
+
+\mainmatter
+
+\changefontsizes[16pt]{13pt}
+\pagestyle{plain}
+
+\chapter{Giới thiệu về Kotlin}
+
+\section{Bối cảnh ra đời}
+
+Kotlin là một ngôn ngữ lập trình hiện đại được phát triển bởi JetBrains, công ty nổi tiếng với các IDE như IntelliJ IDEA, PyCharm, và WebStorm. Dự án Kotlin bắt đầu vào năm 2010 và được công bố chính thức vào năm 2011. Phiên bản ổn định đầu tiên (1.0) được ra mắt vào tháng 2/2016.
+
+Tên gọi "Kotlin" được đặt theo tên hòn đảo Kotlin gần St. Petersburg, Nga - nơi đặt văn phòng của JetBrains, tương tự như Java được đặt theo tên đảo Java của Indonesia.
+
+\subsection{Động lực phát triển}
+
+JetBrains đã phát triển Kotlin xuất phát từ những nhu cầu thực tế trong công việc của họ:
+
+\begin{itemize}
+\item \textbf{Tăng năng suất}: Cần một ngôn ngữ giúp lập trình viên viết mã nhanh hơn với ít boilerplate code hơn Java
+\item \textbf{An toàn hơn}: Giảm thiểu các lỗi runtime phổ biến, đặc biệt là NullPointerException
+\item \textbf{Tương thích với Java}: Cần khả năng tương tác 100\% với Java để tận dụng hệ sinh thái JVM
+\item \textbf{Công cụ tốt hơn}: Là công ty phát triển IDE, JetBrains muốn một ngôn ngữ có hỗ trợ công cụ tuyệt vời ngay từ đầu
+\end{itemize}
+
+Theo Andrey Breslav - Lead Language Designer của Kotlin: "Chúng tôi muốn tăng năng suất của đội ngũ, và chúng tôi cần một ngôn ngữ tốt hơn Java nhưng vẫn tương thích với hệ sinh thái Java hiện có."
+
+\section{Vị trí trong hệ sinh thái ngôn ngữ lập trình}
+
+Kotlin được thiết kế để chạy trên Java Virtual Machine (JVM), nhưng không chỉ giới hạn ở đó. Ngôn ngữ này có thể được biên dịch thành:
+
+\begin{itemize}
+\item \textbf{JVM bytecode}: Chạy trên máy ảo Java
+\item \textbf{JavaScript}: Cho phép phát triển ứng dụng web frontend
+\item \textbf{Native code}: Thông qua Kotlin/Native, có thể biên dịch sang mã máy cho iOS, macOS, Windows, Linux
+\end{itemize}
+
+\subsection{So sánh với các ngôn ngữ khác}
+
+\textbf{Kotlin vs Java}
+
+Kotlin được xem là "Better Java" - một phiên bản cải tiến của Java với các ưu điểm:
+\begin{itemize}
+\item Cú pháp ngắn gọn hơn (ít boilerplate code)
+\item Null safety được tích hợp vào type system
+\item Extension functions
+\item Coroutines cho lập trình bất đồng bộ
+\item Smart casts
+\end{itemize}
+
+\textbf{Kotlin vs Scala}
+
+Trong khi Scala tập trung nhiều vào lập trình hàm thuần túy và các khái niệm phức tạp, Kotlin theo đuổi triết lý thực dụng (pragmatic):
+\begin{itemize}
+\item Dễ học hơn Scala
+\item Compilation time nhanh hơn
+\item Tương thác Java tốt hơn
+\item Nhưng ít mạnh mẽ hơn về khả năng FP so với Scala
+\end{itemize}
+
+\section{Mốc quan trọng trong lịch sử phát triển}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Năm} & \textbf{Sự kiện} \\
+\hline
+2010 & JetBrains bắt đầu dự án Kotlin \\
+\hline
+2011 & Công bố Kotlin ra công chúng \\
+\hline
+2016 & Phát hành Kotlin 1.0 (phiên bản ổn định đầu tiên) \\
+\hline
+2017 & Google công bố Kotlin là ngôn ngữ chính thức cho Android \\
+\hline
+2019 & Google tuyên bố Kotlin là ngôn ngữ ưu tiên (preferred language) cho Android \\
+\hline
+2021 & Kotlin trở thành một trong những ngôn ngữ phát triển nhanh nhất \\
+\hline
+\end{tabular}
+\caption{Các mốc quan trọng trong lịch sử Kotlin}
+\end{table}
+
+Sự kiện quan trọng nhất là Google I/O 2017 khi Google công bố Kotlin là ngôn ngữ chính thức cho phát triển Android. Điều này đã thúc đẩy sự phát triển của Kotlin một cách đáng kể, với hàng triệu lập trình viên Android bắt đầu học và sử dụng Kotlin.
+
+\section{Triết lý thiết kế}
+
+Kotlin được xây dựng dựa trên bốn trụ cột chính:
+
+\subsection{Pragmatic (Thực dụng)}
+
+Kotlin không phải là ngôn ngữ nghiên cứu hay học thuật. Nó được thiết kế để giải quyết các vấn đề thực tế mà các nhà phát triển gặp phải hàng ngày:
+
+\begin{itemize}
+\item Tập trung vào production code, không phải prototype
+\item Các tính năng được thêm vào dựa trên nhu cầu thực tế
+\item Không theo đuổi sự hoàn hảo về mặt lý thuyết nếu nó làm phức tạp việc sử dụng
+\end{itemize}
+
+\subsection{Concise (Ngắn gọn)}
+
+Một trong những mục tiêu chính là giảm thiểu boilerplate code:
+
+\textbf{Ví dụ: Data class}
+
+Trong Java:
+\begin{lstlisting}[language=Java]
+public class Person {
+    private String name;
+    private int age;
+    
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    
+    @Override
+    public boolean equals(Object o) { ... }
+    
+    @Override
+    public int hashCode() { ... }
+    
+    @Override
+    public String toString() { ... }
+}
+\end{lstlisting}
+
+Trong Kotlin:
+\begin{lstlisting}[language=Kotlin]
+data class Person(val name: String, val age: Int)
+\end{lstlisting}
+
+Chỉ với một dòng code, Kotlin tự động tạo ra constructor, getters, \texttt{equals()}, \texttt{hashCode()}, \texttt{toString()}, và \texttt{copy()}.
+
+\subsection{Safe (An toàn)}
+
+Kotlin tích hợp nhiều cơ chế an toàn ngay trong ngôn ngữ:
+
+\begin{itemize}
+\item \textbf{Null Safety}: Phân biệt rõ ràng giữa nullable và non-nullable types
+\item \textbf{No checked exceptions}: Loại bỏ các checked exception gây rườm rà
+\item \textbf{Smart casts}: Tự động ép kiểu sau khi kiểm tra
+\end{itemize}
+
+\subsection{Interoperable (Khả năng tương tác)}
+
+Kotlin được thiết kế để tương tác 100\% với Java:
+
+\begin{itemize}
+\item Có thể gọi code Java từ Kotlin và ngược lại
+\item Sử dụng các thư viện Java hiện có
+\item Có thể mix Java và Kotlin trong cùng một project
+\item Biên dịch thành JVM bytecode giống như Java
+\end{itemize}
+
+Điều này cho phép các team áp dụng Kotlin từng bước (incremental adoption) thay vì phải rewrite toàn bộ codebase.
+
+\section{Ứng dụng và cộng đồng}
+
+\subsection{Lĩnh vực ứng dụng}
+
+Kotlin hiện được sử dụng rộng rãi trong nhiều lĩnh vực:
+
+\begin{itemize}
+\item \textbf{Android Development}: Ứng dụng chính và phổ biến nhất
+\item \textbf{Backend Development}: Spring Boot, Ktor framework
+\item \textbf{Web Frontend}: Kotlin/JS
+\item \textbf{Multiplatform}: Kotlin Multiplatform Mobile (KMM) cho iOS và Android
+\item \textbf{Data Science}: Kotlin for Data Science
+\end{itemize}
+
+\subsection{Thống kê và xu hướng}
+
+Theo các nguồn thống kê:
+
+\begin{itemize}
+\item Hơn 60\% ứng dụng Android top 1000 sử dụng Kotlin (2021)
+\item Hơn 95\% các ứng dụng mới trên Android sử dụng Kotlin (2022)
+\item Stack Overflow Developer Survey liên tục xếp Kotlin trong top "Most Loved Languages"
+\item GitHub Octoverse xếp Kotlin trong top ngôn ngữ phát triển nhanh nhất
+\end{itemize}
+
+\subsection{Các công ty lớn sử dụng Kotlin}
+
+\begin{itemize}
+\item Google (Android, nhiều dự án nội bộ)
+\item Netflix (backend services)
+\item Pinterest (mobile app)
+\item Uber (internal tools)
+\item Trello (mobile app)
+\item Evernote (mobile app)
+\item Slack (mobile app)
+\end{itemize}
+
+\section{Tổng quan về báo cáo}
+
+Báo cáo này sẽ phân tích Kotlin từ góc độ nguyên lý ngôn ngữ lập trình (Programming Language Principles), tập trung vào các khía cạnh:
+
+\begin{itemize}
+\item \textbf{Phần I - Cơ sở lý thuyết}: Triết lý thiết kế, hệ thống kiểu, và null safety
+\item \textbf{Phần II - Paradigms \& Features}: Lập trình hàm, quản lý trạng thái, xử lý lỗi, đệ quy, và generics
+\item \textbf{Phần III - Advanced \& Practical}: Extension functions, DSLs, coroutines, và Java interop
+\end{itemize}
+
+Mỗi chương sẽ phân tích cả góc độ lý thuyết (từ "The Joy of Kotlin") và thực tế (từ "Kotlin in Action"), giúp người đọc hiểu sâu về các quyết định thiết kế và ứng dụng thực tế của Kotlin.
+
+\chapter{Triết lý thiết kế và Nguyên lý cốt lõi}
+
+[Nội dung Chapter 2 sẽ được viết tiếp...]
+
+\chapter{Hệ thống kiểu cơ bản}
+
+[Nội dung Chapter 3 sẽ được viết tiếp...]
+
+\chapter{Null Safety - Giải quyết lỗi tỷ đô}
+
+[Nội dung Chapter 4 sẽ được viết tiếp...]
+
+\chapter{Lập trình hàm trong Kotlin}
+
+[Nội dung Chapter 5 sẽ được viết tiếp...]
+
+\chapter{Quản lý trạng thái và Immutability}
+
+[Nội dung Chapter 6 sẽ được viết tiếp...]
+
+\chapter{Xử lý lỗi}
+
+[Nội dung Chapter 7 sẽ được viết tiếp...]
+
+\chapter{Đệ quy và Optimization}
+
+[Nội dung Chapter 8 sẽ được viết tiếp...]
+
+\chapter{Generics và Variance}
+
+[Nội dung Chapter 9 sẽ được viết tiếp...]
+
+\chapter{Extension Functions và DSLs}
+
+[Nội dung Chapter 10 sẽ được viết tiếp...]
+
+\chapter{Coroutines và Lập trình bất đồng bộ}
+
+[Nội dung Chapter 11 sẽ được viết tiếp...]
+
+\chapter{Java Interoperability}
+
+[Nội dung Chapter 12 sẽ được viết tiếp...]
+
+\chapter{Kết luận}
+
+Báo cáo này đã trình bày một cái nhìn toàn diện về ngôn ngữ lập trình Kotlin từ góc độ nguyên lý ngôn ngữ lập trình. Thông qua việc phân tích các khía cạnh từ triết lý thiết kế, hệ thống kiểu, null safety, đến lập trình hàm, quản lý trạng thái, và các tính năng nâng cao, chúng ta thấy rõ Kotlin là một ngôn ngữ được thiết kế cẩn thận với sự cân bằng giữa lý thuyết và thực tiễn.
+
+Kotlin thành công trong việc kết hợp những ý tưởng tốt nhất từ nhiều paradigm lập trình khác nhau, đồng thời duy trì tính thực dụng và khả năng tương tác với Java. Điều này giúp Kotlin trở thành một lựa chọn hấp dẫn cho cả phát triển Android lẫn backend development.
+
+Với sự phát triển liên tục của cộng đồng và sự hỗ trợ từ JetBrains cùng Google, Kotlin hứa hẹn sẽ tiếp tục là một trong những ngôn ngữ lập trình quan trọng trong tương lai.
+
+\newpage
+
+\chapter*{Tài liệu tham khảo}
+\addcontentsline{toc}{chapter}{Tài liệu tham khảo}
+
+\begin{enumerate}
+\item Dmitry Jemerov, Svetlana Isakova. \textit{Kotlin in Action}. Manning Publications, 2017.
+
+\item Pierre-Yves Saumont. \textit{The Joy of Kotlin}. Manning Publications, 2019.
+
+\item JetBrains. \textit{Kotlin Language Documentation}. \url{https://kotlinlang.org/docs/}
+
+\item Roman Elizarov. \textit{Kotlin Coroutines: Deep Dive}. Various publications, 2018-2020.
+
+\item Venkat Subramaniam. \textit{Programming Kotlin}. Pragmatic Bookshelf, 2019.
+
+\item Joshua Bloch. \textit{Effective Java} (3rd Edition). Addison-Wesley, 2018. (Referenced for Java comparison)
+
+\item Martin Odersky, Lex Spoon, Bill Venners. \textit{Programming in Scala} (4th Edition). Artima Press, 2019. (Referenced for Scala comparison)
+
+\item Google Android Developers. \textit{Kotlin for Android Developers}. \url{https://developer.android.com/kotlin}
+\end{enumerate}
+
+\end{document}

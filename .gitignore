@@ -1,0 +1,29 @@
+# Source PDFs - Bản quyền (KHÔNG push lên GitHub)
+dokumen.pub_kotlin-in-action-2.pdf
+Saumont_The-Joy-of-Kotlin_RuLit_Me_670097.pdf
+
+# LaTeX auxiliary files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Generated PDFs (output files)
+main.pdf
+kotlin_report.pdf
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+*~

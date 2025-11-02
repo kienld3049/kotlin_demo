@@ -1,0 +1,156 @@
+\documentclass[11.5pt]{beamer}
+%hyperref={unicode, bookmarks=true, pdfpagemode=FullScreen}
+
+\mode<presentation>
+\usetheme{Oxygen}
+%\usetheme{Rochester}
+%\usetheme{}
+\usepackage{thumbpdf}
+\usepackage{wasysym}
+\usepackage{ucs}
+\usepackage[utf8x]{vietnam}%{inputenc}%{vietnam}
+% \usepackage[utf8]{vietnam} %{inputenc} %
+\usepackage{pgf,pgfarrows,pgfnodes,pgfautomata,pgfheaps,pgfshade}
+\usepackage{verbatim}
+%\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{multirow}
+\usepackage{epstopdf}
+\usepackage{natbib}
+\usepackage{changepage}
+\usepackage{lipsum}
+
+\defbeamertemplate{footline}{nonum}{%
+	\addtocounter{framenumber}{-1}
+}
+
+\BeforeBeginEnvironment{frame}{%
+	\setbeamertemplate{footline}[frame number]{}
+}
+
+\makeatletter
+\define@key{beamerframe}{nonum}[true]{%
+	\setbeamertemplate{footline}[nonum]%
+}
+\makeatother
+
+\def\beamer@size{{size11.clo}}
+
+\DeclareOptionBeamer{8pt}{\def\beamer@size{{size8.clo}}}
+\DeclareOptionBeamer{9pt}{\def\beamer@size{{size9.clo}}}
+\DeclareOptionBeamer{10pt}{\def\beamer@size{{size10.clo}}}
+\DeclareOptionBeamer{11pt}{\def\beamer@size{{size11.clo}}}
+\DeclareOptionBeamer{12pt}{\def\beamer@size{{size12.clo}}}
+\DeclareOptionBeamer{14pt}{\def\beamer@size{{size14.clo}}}
+\DeclareOptionBeamer{17pt}{\def\beamer@size{{size17.clo}}}
+\DeclareOptionBeamer{20pt}{\def\beamer@size{{size20.clo}}}
+
+
+\begin{document}
+
+\title{Bài trình bày nội dung khoa học}
+
+\author{Tác giả\\
+Trường Đại học Công nghệ, Đại học Quốc gia Hà Nội,\\
+Tòa nhà E3, 144 Xuân Thủy, Cầu Giấy, Hà Nội, Việt Nam
+}
+
+
+\setbeamertemplate{caption}[numbered]
+\date{}
+
+\begin{normalsize}
+	\frame{\titlepage}
+\end{normalsize}
+
+
+\section*{}
+\begin{frame}
+  \frametitle{Nội dung}
+  \tableofcontents{}       % [section=1,hidesubsections]
+%   \begin{huge}
+%   	\begin{itemize}
+%   		\item Giới thiệu
+%   		\item Giải pháp
+%   		\item Thảo luận
+%   		\item Kết luận
+%   	\end{itemize}  	
+%   \end{huge}
+\end{frame}
+
+\section{Giới thiệu}
+
+\begin{frame}
+  \frametitle{Giới thiệu bài trình bày}
+	\begin{itemize}
+	    \item Giới thiệu các vấn đề liên quan đến bài trình bày
+	    
+	    \item Một số nghiên cứu liên quan~\cite{Buckle:1998:StaticAnalysisofSafetyCriticalSoftwareTechniquesToolsandExperiences,Wichmann:1995:Industrialperspectiveonstaticanalysis,WARD:1989:TheStaticAnalysisofSafetyCriticalSoftwareUsingMALPAS}\cite{Anand:2013:AnOrchestratedSurveyofMethodologiesforAutomatedSoftwareTestCaseGeneration,Myers:2004:TheArtofSoftwareTesting}\cite{Larson:2003:HighCoverageDetectionofInputRelatedSecurityFacults,DART:Godefroid:2005:DART:DirectedAutomatedRandomTesting,KLEE:Cadar:2008:KLEE:UnassistedandAutomaticGenerationofHighCoverageTestsforComplexSystemsPrograms}\cite{DART:Godefroid:2005:DART:DirectedAutomatedRandomTesting}\cite{DucAnh:2019:ImprovementsofDirectedAutomatedRandomTestinginTestDataGenerationforCppProjects}\cite{Duy:2013:AutomaticGenerationofTestCasesinRegressionTestingforLustreSCADEPrograms,Duy:2015:ARegressionTestingApproachforLustreSCADEPrograms,Yoshida:2016:FSX:FineGrainedIncrementalUnitTestGenerationforCCppPrograms}
+        
+	\end{itemize}
+	\vspace{5mm}
+   \hspace{5mm}\textcolor{blue}{$\rightarrow$ Mục tiêu của nghiên cứu} 
+
+\end{frame}
+
+\section{Giải pháp}
+
+\begin{frame}
+  \frametitle{Giải pháp (1/2)}
+  Trình bày giải pháp
+   \begin{figure}[h]
+         \centering 
+         \includegraphics[scale=0.85]{images/Bai7_TeacherLearner.pdf}
+    \end{figure}
+  
+
+\end{frame}
+
+\section{Thảo luận}
+
+\begin{frame}%[allowframebreaks]
+  \frametitle{Thảo luận}
+  Một số thảo  luận về chủ đề nghiên cứu
+	\begin{enumerate}
+    \item Thảo luận 1
+    
+    \item Thảo luận 2
+    
+    \item ...
+\end{enumerate}
+\end{frame}
+
+\section{Kết luận}
+
+\begin{frame}%[allowframebreaks]
+  \frametitle{Kết luận}
+  \begin{itemize}
+      \item 
+      Tóm tắt nội dung nghiên cứu
+      
+      \item Tóm tắt các việc trong tương lai
+  \end{itemize}
+   
+
+\end{frame}
+
+\begin{frame}
+
+\begin{center}
+{\LARGE Cảm ơn}
+\end{center}
+
+\end{frame}
+
+%\section{References}
+
+
+
+\begin{frame}[nonum,allowframebreaks]%<presentation:1>
+
+\frametitle{References}
+\bibliographystyle{apalike}
+\bibliography{refs}
+\end{frame}
+
+\end{document}
