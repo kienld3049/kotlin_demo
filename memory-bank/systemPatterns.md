@@ -33,24 +33,52 @@ Distribution:
 ---
 
 ### CHƯƠNG 2: TRIẾT LÝ THIẾT KẾ
-**Mục đích**: Establish design philosophy
+**Mục đích**: Establish design philosophy và evaluate theo academic framework
 
 **Nội dung**:
 - Safe Programming philosophy (từ Joy of Kotlin)
 - Pragmatic approach vs Academic purity
 - Trade-offs: Theory vs Practice
 - Design principles: Minimizing errors, Maximizing expressiveness
+- **NEW: Đánh giá theo Sebesta's Language Evaluation Criteria**
 
 **Sources**:
 - Joy of Kotlin: About this book (7 key techniques)
 - Kotlin in Action: Ch 1 (Design goals)
+- **Robert Sebesta: "Concepts of Programming Languages" (Ch 1 - Evaluation)**
 
 **Key Concepts**:
 - Referential transparency
 - Abstraction over implementation
 - Safe vs Unsafe operations
+- **Sebesta's 4 criteria: Readability, Writability, Reliability, Cost**
 
-**Tone**: Theory-heavy
+**Structure mở rộng**:
+```
+2.1 Safe Programming Philosophy
+2.2 Pragmatic vs Academic Purity
+2.3 4 Design Principles (Pragmatic, Concise, Safe, Interoperable)
+2.4 7 Key Techniques từ Joy of Kotlin
+2.5 Đánh giá theo Tiêu chí Sebesta ⭐ NEW
+    2.5.1 Giới thiệu Language Evaluation Framework
+    2.5.2 Kotlin và Readability
+    2.5.3 Kotlin và Writability
+    2.5.4 Kotlin và Reliability
+    2.5.5 Kotlin và Cost
+    2.5.6 Trade-offs Analysis (So sánh Java/Kotlin/Scala)
+```
+
+**Mapping 4 Principles → Sebesta Criteria**:
+| Kotlin Philosophy | Sebesta Criteria | Impact |
+|------------------|------------------|---------|
+| Concise | → Writability ↑ | Less boilerplate = faster dev |
+| Safe | → Reliability ↑ | Null safety = fewer errors |
+| Interoperable | → Cost ↓ | Java reuse = lower migration |
+| Pragmatic | → All three | Balanced optimization |
+
+**Tone**: Theory-heavy, academic rigorous
+
+**Expected length**: ~8-10 pages (expanded from ~5 pages)
 
 ---
 
@@ -132,20 +160,73 @@ Distribution:
 ---
 
 ### CHƯƠNG 7: XỬ LÝ LỖI AN TOÀN
-**Mục đích**: Safe error handling
+**Mục đích**: Safe error handling - Deep dive vào philosophical differences
 
-**Nội dung**:
-- Problems với null & exceptions
-- Option/Result types
+**Nội dung EXPANDED**:
+- **NEW: Bối cảnh - Hai paradigm đối lập (Exception vs Value-based)**
+- **NEW: Nguyên lý cốt lõi về control flow vs data modeling**
+- Problems với Exception Model (Java's checked exceptions mistake)
+- **NEW: Breaking Referential Transparency analysis**
+- Value-based Error Handling (Option/Result types)
 - Partial vs Total functions
 - Railway-oriented programming
-- So sánh: Exceptions vs Functional error handling
+- **NEW: Kotlin's Pragmatic Hybrid Approach**
+- **NEW: When to use Exceptions vs Values (Decision framework)**
 
 **Sources**:
-- Joy of Kotlin: Ch 7 (Handling errors, Optional data)
+- Joy of Kotlin: Ch 7 (Handling errors, Optional data, Philosophy)
 - Kotlin in Action: Ch 6 (Nullable types)
+- **Joshua Bloch: "Effective Java" (Ch 10 - Exceptions, Items 69-77)**
+- **Scott Wlaschin: "Railway Oriented Programming"**
+- **Academic papers: Checked exceptions debate**
 
-**Tone**: Theory-heavy
+**Structure chi tiết**:
+```
+7.1 Bối cảnh: Hai Paradigm Đối Lập ⭐ NEW
+    7.1.1 Exception-based Error Handling (Java/C++)
+    7.1.2 Value-based Error Handling (Haskell/Rust)
+    7.1.3 Nguyên lý đối lập cốt lõi
+
+7.2 Problems với Exception Model ⭐ EXPANDED
+    7.2.1 Checked Exceptions: Java's Mistake
+    7.2.2 Hidden Control Flow Problem
+    7.2.3 Breaking Referential Transparency
+
+7.3 Value-based Error Handling
+    7.3.1 Option<T> Pattern
+    7.3.2 Result<T, E> Pattern
+    7.3.3 Railway-oriented Programming
+    7.3.4 Error Composition
+
+7.4 Kotlin's Pragmatic Approach ⭐ NEW
+    7.4.1 No Checked Exceptions (Design Decision)
+    7.4.2 Sealed Classes for Type-safe Errors
+    7.4.3 When to Use Exceptions vs Values
+
+7.5 Case Study: Comparative Analysis ⭐ NEW
+    7.5.1 Java Approach (with checked exceptions)
+    7.5.2 Kotlin Exceptions (unchecked)
+    7.5.3 Kotlin Functional (Result/Option)
+    7.5.4 Analysis: Code, Maintainability, Type Safety
+```
+
+**Key Comparison Table**:
+| Aspect | Exception Model | Value Model | Kotlin Choice |
+|--------|----------------|-------------|---------------|
+| Philosophy | Errors = control flow | Errors = data | Hybrid |
+| Visibility | Hidden (implicit) | Explicit in types | Flexible |
+| Composability | Poor (try/catch) | Excellent (map/flatMap) | Both available |
+| Ref. Transparency | Breaks RT | Preserves RT | Developer choice |
+| Forced handling | Checked exceptions | Type system | No checked |
+
+**Tone**: Theory-heavy, philosophical analysis
+
+**Expected length**: ~12-15 pages (major expansion from ~6 pages)
+
+**Critical Insight** (từ Gemini 2.5):
+> "Nhấn mạnh sự đối lập về NGUYÊN LÝ, không chỉ cú pháp.
+> Exception model vs Value model là fundamental philosophical difference
+> trong cách model errors trong PL design."
 
 ---
 

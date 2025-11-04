@@ -1,75 +1,172 @@
-# Active Context: Current Work Focus
+# Active Context - Kotlin Interpreter Demo Project
 
-## Trạng thái hiện tại
-Đã **hoàn tất memory-bank** với cấu trúc 12 chapters cuối cùng. Phát hiện lỗi LaTeX trong file hiện tại cần fix trước khi tiếp tục.
+## 🎯 Current Project
 
-## Công việc vừa hoàn thành
-1. ✅ Phân tích 2 quyển sách reference
-   - Kotlin in Action (2nd Ed): 18 chapters practical
-   - Joy of Kotlin: 14 chapters functional
+**Project**: Kotlin Mini Compiler + Interpreter Demo  
+**Purpose**: Mô phỏng quá trình biên dịch và thực thi Kotlin từ A đến Z bằng Python  
+**Status**: Planning Phase Complete ✅
 
-2. ✅ Thiết kế cấu trúc 12 chapters
-   - 3 phần: Theory (1-4), Paradigms (5-9), Advanced (10-12)
-   - Balance: Theory/Practice/Balanced = 33%/33%/33%
+## 📝 Project Summary
 
-3. ✅ Tạo Memory Bank hoàn chỉnh
-   - projectbrief.md, productContext.md
-   - systemPatterns.md (cấu trúc chi tiết)
-   - techContext.md, progress.md, activeContext.md
+Đang xây dựng một educational demo về compiler/interpreter cho Kotlin, bao gồm:
+- **Lexer**: Tokenization với location tracking
+- **Parser**: Recursive descent parser tạo AST
+- **Semantic Analyzer**: 2-pass analysis (Collection + Type Checking) với stack-based symbol tables
+- **Interpreter**: Visitor-based evaluator với custom runtime objects
 
-4. ✅ So sánh và thống nhất với kotlin_report.tex
-   - File kotlin_report.tex đã có Chapter 1 hoàn chỉnh
-   - Chapters 2-12 là placeholders
-   - Phát hiện lỗi Unicode cần fix
+## 🔑 Key Technical Decisions
 
-## Next Steps (Ưu tiên)
+### 1. Stack-based Symbol Tables
+- Mỗi scope có parent pointer
+- Name resolution từ current scope lên parent
+- Hỗ trợ nested scopes (functions, blocks, if/while)
 
-### 🚨 URGENT: Fix LaTeX Build Errors
-File main.tex hiện tại có lỗi ngăn cản build:
-1. **Unicode U+200B** (zero-width space) ở line 716
-   - Lỗi: `Unicode character ​ (U+200B) not set up for use with LaTeX`
-   - Cần: Remove invisible characters
-2. **Hyperref warnings** với composite Vietnamese letters
-   - Warning nhưng không blocking
-3. **Overfull hbox** với URLs dài
-   - Cần: URL formatting fixes
+### 2. Multi-Pass Semantic Analysis
+- **Pass 1 (Collection)**: Thu thập function signatures
+- **Pass 2 (Type Checking)**: Kiểm tra types với full context
+- Cho phép forward references và type inference
 
-### Sau khi fix errors:
-1. Kiểm tra kotlin_report.tex structure
-2. Viết nội dung Chapters 2-12 theo systemPatterns.md
-3. Update references.bib với sources từ 2 quyển sách
-4. Test compilation từng chapter
+### 3. Hybrid Runtime Model
+- `KotlinObject` base class wrap Python types
+- Retain Python performance
+- Add Kotlin semantics layer
+- Extensible cho future features
 
-## Quyết định quan trọng
-- **Cấu trúc**: 3 phần - 12 chapters (confirmed)
-- **Language**: Tiếng Việt
-- **Academic level**: Master's thesis
-- **Length**: ~30-40 pages
-- **Sources**: Kotlin in Action (2nd Ed) + Joy of Kotlin
-- **Approach**: Comparative analysis (practical vs functional)
+### 4. Error Collection System
+- `ErrorCollector` pattern - không crash
+- Collect tất cả errors
+- Report với location info
+- User-friendly messages
 
-## Technical Issues Identified
+## 📦 Project Structure
 
-### Critical (Blocking Build):
-1. **Unicode U+200B** at line 716 in main.tex
-   - Character: Zero-width space (invisible)
-   - Impact: Build fails
-   - Solution: Find and remove
+```
+kotlin_interpreter/
+├── src/
+│   ├── lexer/           # Tokenization
+│   ├── parser/          # AST building
+│   ├── semantic/        # Type checking, symbol tables
+│   ├── interpreter/     # Execution engine
+│   └── utils/           # Errors, visualizer, formatter
+├── tests/               # Comprehensive test suite
+├── examples/            # Kotlin sample programs
+├── main.py             # Entry point
+└── requirements.txt    # Dependencies
+```
 
-### Non-Critical (Warnings):
-2. **Hyperref composite letters**
-   - Vietnamese diacritics in PDF bookmarks
-   - Impact: Warnings only, PDF still generates
-   
-3. **Overfull hbox**
-   - Long URLs không break properly
-   - Impact: Aesthetic issue
+## 🎬 Demo Modes
 
-## Current Focus
-**Priority 1**: Fix Unicode error U+200B trong main.tex (line 716) để có thể build successfully.
+1. **Verbose Mode** (`--verbose`): Chi tiết từng bước
+2. **Quiet Mode** (default): Chỉ output/errors
+3. **Interactive Mode** (`--interactive`): Step-through với inspection
+4. **Visualize Mode** (`--visualize`): Tạo AST diagrams, execution traces
 
-**Priority 2**: Sau khi fix, kiểm tra xem cần làm gì với kotlin_report.tex:
-- Option A: Continue với kotlin_report.tex (đã có Ch1 hoàn chỉnh)
-- Option B: Chuyển sang main.tex (file user đang build)
+## 📚 Memory Bank Files
 
-Đang chờ user xác nhận muốn fix main.tex hay làm việc với kotlin_report.tex.
+Đã tạo các file documentation:
+1. ✅ `kotlin-interpreter-project.md` - Project overview, timeline
+2. ✅ `kotlin-interpreter-architecture.md` - Technical architecture chi tiết
+3. ✅ `kotlin-interpreter-implementation.md` - Implementation guide từng phase
+4. ✅ `kotlin-interpreter-demo-modes.md` - UX design, demo modes
+
+## 🎓 Key Insights từ Gemini 2.5 Feedback
+
+### Về Scope Management
+> "Bảng Ký hiệu của em không thể là một dict đơn giản. Em sẽ cần triển khai một Stack các Bảng Ký hiệu"
+
+**Action**: Implemented stack-based SymbolTable với parent pointers
+
+### Về Type Inference
+> "val x = add(5, 3) đòi hỏi trình phân tích phải chạy sau khi nó đã xử lý khai báo của hàm add"
+
+**Action**: Multi-pass analysis - Collection phase trước Type Checking phase
+
+### Về Runtime Model
+> "Một quyết định kỹ thuật quan trọng là: em sẽ dùng thẳng các kiểu của Python hay em sẽ tự định nghĩa các lớp đối tượng thời gian chạy"
+
+**Action**: Hybrid approach - KotlinObject wrapping Python types
+
+## ⏱️ Timeline & Progress
+
+| Phase | Estimate | Status |
+|-------|----------|--------|
+| Planning & Design | 1 day | ✅ Complete |
+| Phase 1: Lexer | 1-2 days | ⏳ Ready to start |
+| Phase 2: Parser | 2-3 days | ⏳ Pending |
+| Phase 3a: Symbol Tables | 2 days | ⏳ Pending |
+| Phase 3b: Type System | 3 days | ⏳ Pending |
+| Phase 4a: Runtime Model | 2 days | ⏳ Pending |
+| Phase 4b: Evaluator | 2 days | ⏳ Pending |
+| Testing & Integration | 2 days | ⏳ Pending |
+| **Total** | **14-16 days** | |
+
+## 🚀 Next Steps
+
+1. **Setup project structure**: Tạo thư mục và files
+2. **Install dependencies**: Setup requirements.txt và install
+3. **Begin Phase 1**: Implement Lexer
+   - Define Token types
+   - Implement Lexer class
+   - Write comprehensive tests
+   - Add verbose output formatting
+
+## 🎯 Success Criteria
+
+- ✅ Parse và execute Kotlin programs cơ bản
+- ✅ Hiển thị rõ từng phase của compilation
+- ✅ Error messages chi tiết với location
+- ✅ Visualizations educational và impressive
+- ✅ Code quality cao, well-tested
+- ✅ Demo flow professional
+
+## 💡 Important Notes
+
+### Kotlin Features Scope
+**Must-have**:
+- Functions, variables (val/var)
+- Basic types (Int, String, Boolean)
+- Expressions, operators
+- Built-in functions (println)
+
+**Should-have**:
+- If/else, while loops
+- Type inference
+- String templates
+
+**Nice-to-have**:
+- Basic classes
+- Null safety
+- Lambda expressions
+
+### Educational Focus
+Demo này là educational tool, focus vào:
+- ✅ Clarity over performance
+- ✅ Step-by-step visualization
+- ✅ Understanding compiler principles
+- ✅ Clean, readable code với comments
+
+### Tools & Libraries
+- **ply** or **lark**: Parser generation
+- **graphviz**: AST visualization
+- **rich**: Terminal formatting
+- **pytest**: Testing framework
+
+## 📖 Related Context
+
+**Previous Project**: Báo cáo LaTeX về Kotlin Programming Language Principles
+- Đã có kiến thức về Kotlin từ "Kotlin in Action" và "The Joy of Kotlin"
+- Context này complement báo cáo bằng practical implementation
+
+**Learning Goals**:
+1. Compiler construction principles
+2. Type systems implementation
+3. Runtime environment design
+4. Error handling best practices
+5. Educational software design
+
+## 🔄 Update History
+
+- **2025-01-04 23:58**: Created memory bank files, completed planning phase
+- **2025-01-04 23:44**: Switched to ACT MODE, started creating memory bank
+- **2025-01-04 23:16**: Received Gemini 2.5 feedback on technical architecture
+- **2025-01-04 22:48**: Initial discussion about project goals and scope

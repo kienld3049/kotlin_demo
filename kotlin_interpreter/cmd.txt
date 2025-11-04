@@ -1,0 +1,1 @@
+cd kotlin_interpreter && python main.py test_simple.kt 2>&1 | head -150
