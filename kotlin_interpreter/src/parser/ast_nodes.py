@@ -61,7 +61,7 @@ class FunctionDeclaration(Declaration):
     parameters: List['Parameter']
     return_type: Optional[str]  # None means Unit (inferred)
     body: 'BlockStatement'
-    location: SourceLocation
+    location: SourceLocation  # Inherited from Declaration, must be last
     
     def __repr__(self) -> str:
         params = ', '.join(str(p) for p in self.parameters)

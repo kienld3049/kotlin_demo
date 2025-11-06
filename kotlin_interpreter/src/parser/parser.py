@@ -150,7 +150,7 @@ class Parser:
         self.consume(TokenType.LBRACE, "Expected '{' before function body")
         body = self.block_statement()
         
-        # Signature: (location, name, parameters, return_type, body)
+        # dataclass inheritance: location from parent Declaration comes FIRST
         return FunctionDeclaration(location, name, parameters, return_type, body)
     
     def parameter(self) -> Parameter:
@@ -191,7 +191,7 @@ class Parser:
         if self.match(TokenType.ASSIGN):
             initializer = self.expression()
         
-        # Correct order: location, is_mutable, name, var_type (Optional), initializer (Optional)
+        # dataclass inheritance: location from parent Declaration comes FIRST
         return VariableDeclaration(location, is_mutable, name, var_type, initializer)
     
     def statement(self) -> Statement:
@@ -207,7 +207,8 @@ class Parser:
         if self.match(TokenType.VAL, TokenType.VAR):
             # Variable declaration as statement
             var_decl = self.variable_declaration()
-            return DeclarationStatement(var_decl, var_decl.location)
+            # dataclass: location comes FIRST
+            return DeclarationStatement(var_decl.location, var_decl)
         
         return self.expression_statement()
     
@@ -220,7 +221,8 @@ class Parser:
             statements.append(self.statement())
         
         self.consume(TokenType.RBRACE, "Expected '}' after block")
-        return BlockStatement(statements, location)
+        # dataclass: location comes FIRST
+        return BlockStatement(location, statements)
     
     def if_statement(self) -> IfStatement:
         """Parse if statement."""
@@ -236,7 +238,8 @@ class Parser:
         if self.match(TokenType.ELSE):
             else_branch = self.statement()
         
-        return IfStatement(condition, then_branch, else_branch, location)
+        # dataclass: location comes FIRST
+        return IfStatement(location, condition, then_branch, else_branch)
     
     def while_statement(self) -> WhileStatement:
         """Parse while statement."""
@@ -248,7 +251,8 @@ class Parser:
         
         body = self.statement()
         
-        return WhileStatement(condition, body, location)
+        # dataclass: location comes FIRST
+        return WhileStatement(location, condition, body)
     
     def return_statement(self) -> ReturnStatement:
         """Parse return statement."""
@@ -265,12 +269,14 @@ class Parser:
             ]:
                 value = self.expression()
         
-        return ReturnStatement(value, location)
+        # dataclass: location comes FIRST
+        return ReturnStatement(location, value)
     
     def expression_statement(self) -> ExpressionStatement:
         """Parse expression statement."""
         expr = self.expression()
-        return ExpressionStatement(expr, expr.location)
+        # dataclass: location comes FIRST
+        return ExpressionStatement(expr.location, expr)
     
     # Expression parsing (precedence climbing)
     
@@ -287,7 +293,8 @@ class Parser:
             value = self.assignment()
             
             if isinstance(expr, IdentifierExpression):
-                return AssignmentExpression(expr.name, value, equals.location)
+                # dataclass: location comes FIRST
+                return AssignmentExpression(equals.location, expr.name, value)
             
             raise ParseError("Invalid assignment target", equals)
         
@@ -300,7 +307,8 @@ class Parser:
         while self.match(TokenType.OR):
             operator = self.previous().value
             right = self.logical_and()
-            expr = BinaryExpression(expr, operator, right, expr.location)
+            # dataclass: location comes FIRST
+            expr = BinaryExpression(expr.location, expr, operator, right)
         
         return expr
     
@@ -311,7 +319,8 @@ class Parser:
         while self.match(TokenType.AND):
             operator = self.previous().value
             right = self.equality()
-            expr = BinaryExpression(expr, operator, right, expr.location)
+            # dataclass: location comes FIRST
+            expr = BinaryExpression(expr.location, expr, operator, right)
         
         return expr
     
@@ -322,7 +331,8 @@ class Parser:
         while self.match(TokenType.EQUAL, TokenType.NOT_EQUAL):
             operator = self.previous().value
             right = self.comparison()
-            expr = BinaryExpression(expr, operator, right, expr.location)
+            # dataclass: location comes FIRST
+            expr = BinaryExpression(expr.location, expr, operator, right)
         
         return expr
     
@@ -336,7 +346,8 @@ class Parser:
         ):
             operator = self.previous().value
             right = self.addition()
-            expr = BinaryExpression(expr, operator, right, expr.location)
+            # dataclass: location comes FIRST
+            expr = BinaryExpression(expr.location, expr, operator, right)
         
         return expr
     
@@ -347,7 +358,8 @@ class Parser:
         while self.match(TokenType.PLUS, TokenType.MINUS):
             operator = self.previous().value
             right = self.multiplication()
-            expr = BinaryExpression(expr, operator, right, expr.location)
+            # dataclass: location comes FIRST
+            expr = BinaryExpression(expr.location, expr, operator, right)
         
         return expr
     
@@ -358,7 +370,8 @@ class Parser:
         while self.match(TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.MODULO):
             operator = self.previous().value
             right = self.unary()
-            expr = BinaryExpression(expr, operator, right, expr.location)
+            # dataclass: location comes FIRST
+            expr = BinaryExpression(expr.location, expr, operator, right)
         
         return expr
     
@@ -366,8 +379,10 @@ class Parser:
         """Parse unary expression."""
         if self.match(TokenType.NOT, TokenType.MINUS):
             operator = self.previous().value
+            location = self.previous().location
             operand = self.unary()
-            return UnaryExpression(operator, operand, self.previous().location)
+            # dataclass: location comes FIRST
+            return UnaryExpression(location, operator, operand)
         
         return self.call()
     
@@ -392,29 +407,37 @@ class Parser:
         
         paren = self.consume(TokenType.RPAREN, "Expected ')' after arguments")
         
-        return CallExpression(callee.name, arguments, callee.location)
+        # dataclass: location comes FIRST
+        return CallExpression(callee.location, callee.name, arguments)
     
     def primary(self) -> Expression:
         """Parse primary expression."""
         # Literals
         if self.match(TokenType.TRUE):
-            return LiteralExpression(True, "Boolean", self.previous().location)
+            location = self.previous().location
+            # dataclass: location comes FIRST
+            return LiteralExpression(location, True, "Boolean")
         
         if self.match(TokenType.FALSE):
-            return LiteralExpression(False, "Boolean", self.previous().location)
+            location = self.previous().location
+            # dataclass: location comes FIRST
+            return LiteralExpression(location, False, "Boolean")
         
         if self.match(TokenType.INT_LITERAL):
             token = self.previous()
-            return LiteralExpression(token.value, "Int", token.location)
+            # dataclass: location comes FIRST
+            return LiteralExpression(token.location, token.value, "Int")
         
         if self.match(TokenType.STRING_LITERAL):
             token = self.previous()
-            return LiteralExpression(token.value, "String", token.location)
+            # dataclass: location comes FIRST
+            return LiteralExpression(token.location, token.value, "String")
         
         # Identifier
         if self.match(TokenType.IDENTIFIER):
             token = self.previous()
-            return IdentifierExpression(token.value, token.location)
+            # dataclass: location comes FIRST
+            return IdentifierExpression(token.location, token.value)
         
         # Parenthesized expression
         if self.match(TokenType.LPAREN):
@@ -441,7 +464,8 @@ class Parser:
         self.consume(TokenType.ELSE, "If expression requires 'else' branch")
         else_branch = self.expression()
         
-        return IfExpression(condition, then_branch, else_branch, location)
+        # dataclass: location comes FIRST
+        return IfExpression(location, condition, then_branch, else_branch)
     
     def synchronize(self):
         """Synchronize parser after error (error recovery)."""

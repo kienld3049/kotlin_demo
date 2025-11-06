@@ -204,16 +204,16 @@ class Evaluator:
     
     def eval_literal(self, node: LiteralExpression) -> RuntimeValue:
         """Evaluate literal expression."""
-        if node.type == "Int":
+        if node.literal_type == "Int":
             return make_int(node.value)
-        elif node.type == "String":
+        elif node.literal_type == "String":
             return make_string(node.value)
-        elif node.type == "Boolean":
+        elif node.literal_type == "Boolean":
             return make_boolean(node.value)
-        elif node.type == "Unit":
+        elif node.literal_type == "Unit":
             return make_unit()
         else:
-            raise RuntimeError(f"Unknown literal type: {node.type}")
+            raise RuntimeError(f"Unknown literal type: {node.literal_type}")
     
     def eval_identifier(self, node: IdentifierExpression) -> RuntimeValue:
         """Evaluate identifier expression."""
