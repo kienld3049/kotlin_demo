@@ -1,1 +1,81 @@
 cd kotlin_interpreter && python main.py test_simple.kt 2>&1 | head -150
+
+
+======================================================================
+  KOTLIN INTERPRETER - DEMO ĐẦY ĐỦ TỪ A → Z
+======================================================================
+
+[A] Soạn thảo (Writing)
+----------------------------------------------------------------------
+Source code:
+fun main() {
+    val x = 5
+    val y = 10
+    println(x + y)
+}
+
+
+[B] Phân tích Từ vựng (Lexical Analysis - Lexer)
+----------------------------------------------------------------------
+Chuyển đổi code thành các tokens (từ vựng)...
+
+Tokens được tạo ra:
+    1. TokenType.FUN   : 'fun'
+    2. TokenType.IDENTIFIER : 'main'
+    3. TokenType.LPAREN : '('
+    4. TokenType.RPAREN : ')'
+    5. TokenType.LBRACE : '{'
+    6. TokenType.VAL   : 'val'
+    7. TokenType.IDENTIFIER : 'x'
+    8. TokenType.ASSIGN : '='
+    9. TokenType.INT_LITERAL : 5
+   10. TokenType.VAL   : 'val'
+   11. TokenType.IDENTIFIER : 'y'
+   12. TokenType.ASSIGN : '='
+   13. TokenType.INT_LITERAL : 10
+   14. TokenType.IDENTIFIER : 'println'
+   15. TokenType.LPAREN : '('
+   16. TokenType.IDENTIFIER : 'x'
+   17. TokenType.PLUS  : '+'
+   18. TokenType.IDENTIFIER : 'y'
+   19. TokenType.RPAREN : ')'
+   20. TokenType.RBRACE : '}'
+  ... và 1 tokens nữa
+
+[C] Phân tích Cú pháp (Syntax Analysis - Parser)
+----------------------------------------------------------------------
+Xây dựng cây cú pháp trừu tượng (AST)...
+✓ AST được tạo với 1 declarations
+
+Cấu trúc AST:
+  1. FunctionDeclaration
+     - name: main
+
+[D] Phân tích Ngữ nghĩa (Semantic Analysis)
+----------------------------------------------------------------------
+Kiểm tra kiểu dữ liệu, phạm vi biến, v.v...
+✓ Kiểm tra ngữ nghĩa thành công
+
+Bảng ký hiệu (Symbol Table):
+  - println: function
+  - print: function
+  - main: function
+
+[E] Sinh mã (Code Generation)
+----------------------------------------------------------------------
+SIMPLIFIED: Thay vì sinh Java Bytecode, ta sử dụng AST trực tiếp
+(Trong Kotlin thực tế, bước này sẽ sinh ra file .class)
+✓ AST sẵn sàng để thực thi
+
+[F] Thực thi (Execution)
+----------------------------------------------------------------------
+Interpreter đang thực thi code...
+----------------------------------------------------------------------
+15
+----------------------------------------------------------------------
+✓ Thực thi thành công
+
+[Z] Kết quả (Result)
+----------------------------------------------------------------------
+Chương trình đã chạy xong!
+Quá trình từ A → Z hoàn tất ✓
