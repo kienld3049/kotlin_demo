@@ -23,6 +23,17 @@ kotlin_report.pdf
 *.swp
 *.swo
 
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
 # OS files
 .DS_Store
 Thumbs.db
