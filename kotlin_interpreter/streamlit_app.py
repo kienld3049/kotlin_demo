@@ -6,6 +6,7 @@ Demo mô phỏng cách hoạt động của ngôn ngữ Kotlin từ A đến Z
 import streamlit as st
 import pandas as pd
 from src.gui.state_manager import StateManager
+from src.semantic.symbol_table import SymbolKind
 import json
 
 # Page config
@@ -174,10 +175,10 @@ with col_right:
             for i, token in enumerate(state.tokens):
                 token_data.append({
                     "Index": i,
-                    "Type": token.type,
+                    "Type": token.type.value,
                     "Value": str(token.value),
-                    "Line": token.line,
-                    "Column": token.column
+                    "Line": token.location.line,
+                    "Column": token.location.column
                 })
             
             df = pd.DataFrame(token_data)
@@ -196,26 +197,55 @@ with col_right:
         if show_ast and state.ast:
             st.subheader("Syntax Analysis - Abstract Syntax Tree")
             
-            def ast_to_dict(node):
-                """Convert AST node to dict for display"""
+            def ast_to_dict(node, depth=0, max_depth=10):
+                """Convert AST node to dict for display with proper recursion"""
                 if node is None:
                     return None
                 
-                result = {
-                    "type": node.__class__.__name__
-                }
+                if depth > max_depth:
+                    return {"type": node.__class__.__name__, "...": "max depth reached"}
                 
-                # Add relevant attributes
+                # Base case: primitive types
+                if isinstance(node, (str, int, float, bool)):
+                    return node
+                
+                # Check if it's an AST node
+                if not hasattr(node, '__class__'):
+                    return str(node)
+                
+                result = {"type": node.__class__.__name__}
+                
+                # Get all attributes except private and methods
                 for attr in dir(node):
-                    if not attr.startswith('_') and attr not in ['accept', 'visit']:
+                    if attr.startswith('_') or attr in ['accept', 'visit']:
+                        continue
+                    
+                    try:
                         value = getattr(node, attr)
-                        if not callable(value):
-                            if isinstance(value, list):
-                                result[attr] = [ast_to_dict(v) if hasattr(v, '__class__') and hasattr(v, 'accept') else str(v) for v in value]
-                            elif hasattr(value, '__class__') and hasattr(value, 'accept'):
-                                result[attr] = ast_to_dict(value)
-                            else:
-                                result[attr] = str(value)
+                        if callable(value):
+                            continue
+                        
+                        # Handle different types of values
+                        if value is None:
+                            result[attr] = None
+                        elif isinstance(value, (str, int, float, bool)):
+                            result[attr] = value
+                        elif isinstance(value, list):
+                            # Recursively process list items
+                            result[attr] = [
+                                ast_to_dict(item, depth + 1, max_depth) 
+                                if hasattr(item, '__class__') and not isinstance(item, (str, int, float, bool))
+                                else item
+                                for item in value
+                            ]
+                        elif hasattr(value, '__dict__'):
+                            # It's an object, recurse into it
+                            result[attr] = ast_to_dict(value, depth + 1, max_depth)
+                        else:
+                            result[attr] = str(value)
+                    except Exception:
+                        # Skip attributes that cause errors
+                        continue
                 
                 return result
             
@@ -232,32 +262,44 @@ with col_right:
         if show_symbols and state.symbol_table:
             st.subheader("Semantic Analysis - Symbol Table")
             
-            # Functions
-            if state.symbol_table.functions:
+            # Get all symbols from global scope
+            symbols = state.symbol_table.global_scope.symbols
+            
+            # Separate functions and variables
+            functions = {name: sym for name, sym in symbols.items() 
+                        if sym.kind == SymbolKind.FUNCTION}
+            variables = {name: sym for name, sym in symbols.items() 
+                        if sym.kind == SymbolKind.VARIABLE}
+            
+            # Display Functions
+            if functions:
                 st.write("**Functions:**")
                 func_data = []
-                for name, func_info in state.symbol_table.functions.items():
+                for name, func_sym in functions.items():
+                    # func_sym is FunctionSymbol
+                    params = ", ".join(func_sym.parameter_types)
                     func_data.append({
                         "Name": name,
-                        "Return Type": str(func_info.get('return_type', 'Unit')),
-                        "Parameters": str(func_info.get('params', []))
+                        "Parameters": f"({params})",
+                        "Return Type": func_sym.return_type
                     })
                 if func_data:
-                    st.dataframe(pd.DataFrame(func_data), use_container_width=True, hide_index=True)
+                    st.dataframe(pd.DataFrame(func_data), 
+                               use_container_width=True, hide_index=True)
             
-            # Variables
-            if hasattr(state.symbol_table, 'scopes') and state.symbol_table.scopes:
+            # Display Variables
+            if variables:
                 st.write("**Variables (Global Scope):**")
                 var_data = []
-                for name, var_info in state.symbol_table.scopes[0].items():
-                    if isinstance(var_info, dict):
-                        var_data.append({
-                            "Name": name,
-                            "Type": str(var_info.get('type', 'Unknown')),
-                            "Mutable": "var" if var_info.get('mutable', False) else "val"
-                        })
+                for name, var_sym in variables.items():
+                    var_data.append({
+                        "Name": name,
+                        "Type": var_sym.type,
+                        "Mutable": "var" if var_sym.is_mutable else "val"
+                    })
                 if var_data:
-                    st.dataframe(pd.DataFrame(var_data), use_container_width=True, hide_index=True)
+                    st.dataframe(pd.DataFrame(var_data), 
+                               use_container_width=True, hide_index=True)
             
         elif state.symbol_table:
             st.info("Bật 'Hiển thị Symbol Table' trong sidebar để xem")

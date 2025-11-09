@@ -16,6 +16,7 @@ from src.lexer.lexer import Lexer
 from src.parser.parser import Parser
 from src.semantic.collection_pass import CollectionPass
 from src.semantic.symbol_table import SymbolTable
+from src.semantic.errors import ErrorCollector
 from src.runtime.evaluator import Evaluator
 from src.runtime.environment import Environment
 
@@ -91,13 +92,19 @@ class StateManager:
             
             # Step 3: Semantic Analysis
             symbol_table = SymbolTable()
-            collection_pass = CollectionPass(symbol_table)
-            collection_pass.visit(ast)
+            error_collector = ErrorCollector()
+            collection_pass = CollectionPass(symbol_table, error_collector)
+            collection_pass.collect(ast)
+            
+            # Check for semantic errors
+            if error_collector.has_errors():
+                for error in error_collector.errors:
+                    result['errors'].append(str(error))
+            
             result['symbol_table'] = symbol_table
             
             # Step 4: Execution
-            environment = Environment()
-            evaluator = Evaluator(environment)
+            evaluator = Evaluator()
             
             # Capture output
             import io
