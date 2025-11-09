@@ -8,6 +8,7 @@ import pandas as pd
 from src.gui.state_manager import StateManager
 from src.semantic.symbol_table import SymbolKind
 import json
+import graphviz
 
 # Page config
 st.set_page_config(
@@ -197,60 +198,174 @@ with col_right:
         if show_ast and state.ast:
             st.subheader("Syntax Analysis - Abstract Syntax Tree")
             
-            def ast_to_dict(node, depth=0, max_depth=10):
-                """Convert AST node to dict for display with proper recursion"""
-                if node is None:
-                    return None
-                
-                if depth > max_depth:
-                    return {"type": node.__class__.__name__, "...": "max depth reached"}
-                
-                # Base case: primitive types
-                if isinstance(node, (str, int, float, bool)):
-                    return node
-                
-                # Check if it's an AST node
-                if not hasattr(node, '__class__'):
-                    return str(node)
-                
-                result = {"type": node.__class__.__name__}
-                
-                # Get all attributes except private and methods
-                for attr in dir(node):
-                    if attr.startswith('_') or attr in ['accept', 'visit']:
-                        continue
+            # View toggle
+            view_mode = st.radio(
+                "Chọn chế độ xem:",
+                ["📊 Graph View", "📄 JSON View"],
+                horizontal=True
+            )
+            
+            if view_mode == "📊 Graph View":
+                # Graph visualization
+                def ast_to_graphviz(node, graph=None, parent_id=None, counter=[0], edge_label=""):
+                    """Convert AST to Graphviz diagram with enhanced visualization"""
+                    if node is None:
+                        return graph
                     
-                    try:
-                        value = getattr(node, attr)
-                        if callable(value):
+                    if graph is None:
+                        graph = graphviz.Digraph()
+                        graph.attr(rankdir='TB')  # Top to Bottom
+                        graph.attr('node', shape='box', style='filled')
+                        graph.attr('edge', fontsize='10', fontcolor='gray')
+                    
+                    # Generate unique ID
+                    node_id = f"node_{counter[0]}"
+                    counter[0] += 1
+                    
+                    # Create label with class name
+                    node_type = node.__class__.__name__
+                    label = node_type
+                    
+                    # Determine color based on node type
+                    color = 'lightblue'  # default
+                    if 'Function' in node_type:
+                        color = 'lightgreen'
+                    elif 'Variable' in node_type or 'Declaration' in node_type:
+                        color = 'lightyellow'
+                    elif 'Expression' in node_type:
+                        color = 'lightcoral'
+                    elif 'Literal' in node_type:
+                        color = 'orange'
+                    elif 'Statement' in node_type:
+                        color = 'lightcyan'
+                    
+                    # Add key attributes to label
+                    # Check function_name FIRST (for CallExpression)
+                    if hasattr(node, 'function_name') and node.function_name:
+                        label += f"\\nfunc: {node.function_name}"
+                    elif hasattr(node, 'name') and node.name:
+                        # For other nodes like FunctionDeclaration, VariableDeclaration, IdentifierExpression
+                        label += f"\\nname: {node.name}"
+                    
+                    if hasattr(node, 'value') and node.value is not None:
+                        val_str = str(node.value)
+                        if len(val_str) > 20:
+                            val_str = val_str[:20] + "..."
+                        label += f"\\nvalue: {val_str}"
+                    
+                    if hasattr(node, 'operator') and node.operator:
+                        label += f"\\nop: {node.operator}"
+                    
+                    if hasattr(node, 'literal_type') and node.literal_type:
+                        label += f"\\ntype: {node.literal_type}"
+                    
+                    if hasattr(node, 'is_mutable'):
+                        label += f"\\n{'var' if node.is_mutable else 'val'}"
+                    
+                    if hasattr(node, 'return_type') and node.return_type:
+                        label += f"\\nreturns: {node.return_type}"
+                    
+                    # Add node to graph with color
+                    graph.node(node_id, label, fillcolor=color)
+                    
+                    # Connect to parent with labeled edge
+                    if parent_id:
+                        graph.edge(parent_id, node_id, label=edge_label)
+                    
+                    # Recursively process children with labeled edges
+                    for attr in dir(node):
+                        if attr.startswith('_') or attr in ['accept', 'visit', 'location']:
                             continue
                         
-                        # Handle different types of values
-                        if value is None:
-                            result[attr] = None
-                        elif isinstance(value, (str, int, float, bool)):
-                            result[attr] = value
-                        elif isinstance(value, list):
-                            # Recursively process list items
-                            result[attr] = [
-                                ast_to_dict(item, depth + 1, max_depth) 
-                                if hasattr(item, '__class__') and not isinstance(item, (str, int, float, bool))
-                                else item
-                                for item in value
-                            ]
-                        elif hasattr(value, '__dict__'):
-                            # It's an object, recurse into it
-                            result[attr] = ast_to_dict(value, depth + 1, max_depth)
-                        else:
-                            result[attr] = str(value)
-                    except Exception:
-                        # Skip attributes that cause errors
-                        continue
+                        try:
+                            value = getattr(node, attr)
+                            if callable(value) or value is None:
+                                continue
+                            
+                            # Skip primitive attributes already in label
+                            if attr in ['name', 'value', 'operator', 'literal_type', 'function_name', 
+                                       'is_mutable', 'return_type', 'type']:
+                                continue
+                            
+                            if isinstance(value, list):
+                                for i, item in enumerate(value):
+                                    if hasattr(item, '__class__') and hasattr(item, '__dict__'):
+                                        # Create edge label with attribute name and index
+                                        label = f"{attr}[{i}]" if len(value) > 1 else attr
+                                        ast_to_graphviz(item, graph, node_id, counter, label)
+                            elif hasattr(value, '__class__') and hasattr(value, '__dict__'):
+                                # Skip SourceLocation and other non-AST objects
+                                if value.__class__.__name__ not in ['SourceLocation', 'str', 'int', 'bool']:
+                                    # Use attribute name as edge label
+                                    ast_to_graphviz(value, graph, node_id, counter, attr)
+                        except Exception:
+                            continue
+                    
+                    return graph
                 
-                return result
+                try:
+                    graph = ast_to_graphviz(state.ast)
+                    st.graphviz_chart(graph.source)
+                except Exception as e:
+                    st.error(f"Lỗi khi tạo graph: {str(e)}")
+                    st.info("Chuyển sang JSON View để xem chi tiết")
             
-            ast_dict = ast_to_dict(state.ast)
-            st.json(ast_dict, expanded=1)
+            else:
+                # JSON view
+                def ast_to_dict(node, depth=0, max_depth=10):
+                    """Convert AST node to dict for display with proper recursion"""
+                    if node is None:
+                        return None
+                    
+                    if depth > max_depth:
+                        return {"type": node.__class__.__name__, "...": "max depth reached"}
+                    
+                    # Base case: primitive types
+                    if isinstance(node, (str, int, float, bool)):
+                        return node
+                    
+                    # Check if it's an AST node
+                    if not hasattr(node, '__class__'):
+                        return str(node)
+                    
+                    result = {"type": node.__class__.__name__}
+                    
+                    # Get all attributes except private and methods
+                    for attr in dir(node):
+                        if attr.startswith('_') or attr in ['accept', 'visit']:
+                            continue
+                        
+                        try:
+                            value = getattr(node, attr)
+                            if callable(value):
+                                continue
+                            
+                            # Handle different types of values
+                            if value is None:
+                                result[attr] = None
+                            elif isinstance(value, (str, int, float, bool)):
+                                result[attr] = value
+                            elif isinstance(value, list):
+                                # Recursively process list items
+                                result[attr] = [
+                                    ast_to_dict(item, depth + 1, max_depth) 
+                                    if hasattr(item, '__class__') and not isinstance(item, (str, int, float, bool))
+                                    else item
+                                    for item in value
+                                ]
+                            elif hasattr(value, '__dict__'):
+                                # It's an object, recurse into it
+                                result[attr] = ast_to_dict(value, depth + 1, max_depth)
+                            else:
+                                result[attr] = str(value)
+                        except Exception:
+                            # Skip attributes that cause errors
+                            continue
+                    
+                    return result
+                
+                ast_dict = ast_to_dict(state.ast)
+                st.json(ast_dict, expanded=1)
             
         elif state.ast:
             st.info("Bật 'Hiển thị AST' trong sidebar để xem")
