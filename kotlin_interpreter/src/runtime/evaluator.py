@@ -199,6 +199,8 @@ class Evaluator:
             return self.eval_assignment_expression(node)
         elif isinstance(node, IfExpression):
             return self.eval_if_expression(node)
+        elif isinstance(node, BlockExpression):
+            return self.eval_block_expression(node)
         else:
             raise RuntimeError(f"Unknown expression type: {type(node)}")
     
@@ -349,7 +351,7 @@ class Evaluator:
     def eval_assignment_expression(self, node: AssignmentExpression) -> RuntimeValue:
         """Evaluate assignment expression."""
         value = self.eval_expression(node.value)
-        self.current_env.set(node.name, value)
+        self.current_env.set(node.target, value)
         return value
     
     def eval_if_expression(self, node: IfExpression) -> RuntimeValue:
@@ -360,6 +362,26 @@ class Evaluator:
             return self.eval_expression(node.then_branch)
         else:
             return self.eval_expression(node.else_branch)
+    
+    def eval_block_expression(self, node: BlockExpression) -> RuntimeValue:
+        """Evaluate block as expression.
+        
+        In Kotlin, a block can be an expression. The value of the block
+        is the value of the last expression in the block.
+        """
+        # Create new environment for block scope
+        block_env = Environment(parent=self.current_env)
+        previous_env = self.current_env
+        self.current_env = block_env
+        
+        try:
+            result = make_unit()
+            for stmt in node.statements:
+                result = self.eval_statement(stmt)
+            return result
+        finally:
+            # Restore previous environment
+            self.current_env = previous_env
     
     # Helper methods
     

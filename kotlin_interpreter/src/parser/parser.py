@@ -150,7 +150,7 @@ class Parser:
         self.consume(TokenType.LBRACE, "Expected '{' before function body")
         body = self.block_statement()
         
-        # dataclass inheritance: location from parent Declaration comes FIRST
+        # dataclass: location comes FIRST (inherited from parent)
         return FunctionDeclaration(location, name, parameters, return_type, body)
     
     def parameter(self) -> Parameter:
@@ -459,13 +459,41 @@ class Parser:
         condition = self.expression()
         self.consume(TokenType.RPAREN, "Expected ')' after condition")
         
-        then_branch = self.expression()
+        # Parse then branch - can be block or expression
+        if self.check(TokenType.LBRACE):
+            self.advance()  # consume '{'
+            then_branch = self.parse_block_expression()
+        else:
+            then_branch = self.expression()
         
         self.consume(TokenType.ELSE, "If expression requires 'else' branch")
-        else_branch = self.expression()
+        
+        # Parse else branch - can be block or expression
+        if self.check(TokenType.LBRACE):
+            self.advance()  # consume '{'
+            else_branch = self.parse_block_expression()
+        else:
+            else_branch = self.expression()
         
         # dataclass: location comes FIRST
         return IfExpression(location, condition, then_branch, else_branch)
+    
+    def parse_block_expression(self) -> BlockExpression:
+        """Parse block as expression: { stmt1; stmt2; lastExpr }
+        
+        The value of a block expression is the value of its last expression.
+        Assumes '{' has already been consumed.
+        """
+        location = self.previous().location
+        statements = []
+        
+        while not self.check(TokenType.RBRACE) and not self.is_at_end:
+            statements.append(self.statement())
+        
+        self.consume(TokenType.RBRACE, "Expected '}' after block")
+        
+        # dataclass: location comes FIRST
+        return BlockExpression(location, statements)
     
     def synchronize(self):
         """Synchronize parser after error (error recovery)."""

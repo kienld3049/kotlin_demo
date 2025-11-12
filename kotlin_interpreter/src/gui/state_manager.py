@@ -136,6 +136,7 @@ class StateManager:
     def get_example_programs() -> Dict[str, str]:
         """Trả về danh sách các chương trình mẫu"""
         return {
+            # === Basic Examples ===
             "Hello World": '''fun main() {
     println("Hello, World!")
 }''',
@@ -143,8 +144,8 @@ class StateManager:
     val x = 10
     var y = 20
     y = y + x
-    println("x = $x")
-    println("y = $y")
+    println("x = " + x)
+    println("y = " + y)
 }''',
             "Functions": '''fun add(a: Int, b: Int): Int {
     return a + b
@@ -152,7 +153,7 @@ class StateManager:
 
 fun main() {
     val result = add(5, 3)
-    println("5 + 3 = $result")
+    println("5 + 3 = " + result)
 }''',
             "If Expression": '''fun main() {
     val x = 10
@@ -163,46 +164,66 @@ fun main() {
     }
     println(result)
 }''',
-            "When Expression": '''fun main() {
-    val x = 2
-    val result = when (x) {
-        1 -> "One"
-        2 -> "Two"
-        3 -> "Three"
-        else -> "Other"
-    }
-    println("x is $result")
-}''',
-            "For Loop": '''fun main() {
-    for (i in 1..5) {
-        println("Iteration $i")
-    }
-}''',
             "While Loop": '''fun main() {
     var count = 0
     while (count < 5) {
-        println("Count: $count")
+        println("Count: " + count)
         count = count + 1
     }
 }''',
-            "Lists": '''fun main() {
-    val numbers = listOf(1, 2, 3, 4, 5)
-    println("First: ${numbers[0]}")
-    println("Size: ${numbers.size}")
+            
+            # === Gemini Test Cases ===
+            "Test 1: Sanity Check": '''fun main() {
+    val a = 10
+    var b = 20
+    b = a + b
+    println("a = " + a)
+    println("b = " + b)
 }''',
-            "Null Safety": '''fun main() {
-    val name: String? = "Kotlin"
-    val length = name?.length ?: 0
-    println("Length: $length")
-}''',
-            "Classes": '''class Person(val name: String, var age: Int) {
-    fun greet() {
-        println("Hello, I'm $name and I'm $age years old")
+            "Test 2: Scope & Shadowing": '''fun main() {
+    var i = 1
+    val x = 100
+    
+    println("Start loop, global x = " + x)
+
+    while (i <= 3) {
+        val y = i * 10
+        var x = 5
+        
+        println("Loop " + i + ": y = " + y + ", inner x = " + x)
+        
+        x = x + y
+        println("Loop " + i + ": new inner x = " + x)
+        
+        i = i + 1
     }
+    
+    println("End loop, global x = " + x)
+}''',
+            "Test 3: Factorial (Recursion)": '''fun factorial(n: Int): Int {
+    if (n <= 1) {
+        return 1
+    }
+    
+    val result = n * factorial(n - 1)
+    
+    return result
 }
 
 fun main() {
-    val person = Person("Alice", 25)
-    person.greet()
+    println("--- Function Test ---")
+    val fact5 = factorial(5)
+    println("Factorial of 5 is " + fact5)
+}''',
+            "Test 4a: Undefined Variable": '''fun main() {
+    println(bi_chua_khai_bao)
+}''',
+            "Test 4b: Invalid Operands": '''fun main() {
+    val x = 10 - "hello"
+    println(x)
+}''',
+            "Test 4c: Division by Zero": '''fun main() {
+    val y = 100 / 0
+    println(y)
 }'''
         }

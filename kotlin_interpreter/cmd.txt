@@ -1,5 +1,6 @@
 cd kotlin_interpreter && python main.py test_simple.kt 2>&1 | head -150
 
+streamlit run kotlin_interpreter/streamlit_app.py
 
 ======================================================================
   KOTLIN INTERPRETER - DEMO ĐẦY ĐỦ TỪ A → Z

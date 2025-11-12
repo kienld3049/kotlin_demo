@@ -57,11 +57,11 @@ class Program(ASTNode):
 @dataclass
 class FunctionDeclaration(Declaration):
     """Function declaration: fun name(params): returnType { body }"""
+    location: SourceLocation  # Inherited from Declaration, must come first
     name: str
     parameters: List['Parameter']
     return_type: Optional[str]  # None means Unit (inferred)
     body: 'BlockStatement'
-    location: SourceLocation  # Inherited from Declaration, must be last
     
     def __repr__(self) -> str:
         params = ', '.join(str(p) for p in self.parameters)
@@ -83,11 +83,11 @@ class Parameter:
 @dataclass
 class VariableDeclaration(Declaration):
     """Variable declaration: val/var name: type? = initializer?"""
+    location: SourceLocation  # Inherited from Declaration, must come first
     is_mutable: bool  # True for var, False for val
     name: str
     type: Optional[str]  # None means type inference
     initializer: Optional[Expression]
-    location: SourceLocation
     
     def __repr__(self) -> str:
         mut = "var" if self.is_mutable else "val"
@@ -101,8 +101,8 @@ class VariableDeclaration(Declaration):
 @dataclass
 class BlockStatement(Statement):
     """Block of statements: { statement1; statement2; ... }"""
+    location: SourceLocation  # Inherited from Statement, must come first
     statements: List[Statement]
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"Block({len(self.statements)} statements)"
@@ -111,8 +111,8 @@ class BlockStatement(Statement):
 @dataclass
 class ExpressionStatement(Statement):
     """Statement that is just an expression."""
+    location: SourceLocation  # Inherited from Statement, must come first
     expression: Expression
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"ExpressionStatement({self.expression})"
@@ -121,10 +121,10 @@ class ExpressionStatement(Statement):
 @dataclass
 class IfStatement(Statement):
     """If statement: if (condition) thenBranch else elseBranch?"""
+    location: SourceLocation  # Inherited from Statement, must come first
     condition: Expression
     then_branch: Statement
     else_branch: Optional[Statement]
-    location: SourceLocation
     
     def __repr__(self) -> str:
         else_str = " else ..." if self.else_branch else ""
@@ -134,9 +134,9 @@ class IfStatement(Statement):
 @dataclass
 class WhileStatement(Statement):
     """While loop: while (condition) body"""
+    location: SourceLocation  # Inherited from Statement, must come first
     condition: Expression
     body: Statement
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"While({self.condition})"
@@ -145,8 +145,8 @@ class WhileStatement(Statement):
 @dataclass
 class ReturnStatement(Statement):
     """Return statement: return expression?"""
+    location: SourceLocation  # Inherited from Statement, must come first
     value: Optional[Expression]
-    location: SourceLocation
     
     def __repr__(self) -> str:
         val_str = str(self.value) if self.value else "Unit"
@@ -156,8 +156,8 @@ class ReturnStatement(Statement):
 @dataclass
 class DeclarationStatement(Statement):
     """Declaration as statement (for local variables in function bodies)."""
+    location: SourceLocation  # Inherited from Statement, must come first
     declaration: Declaration
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"DeclStmt({self.declaration})"
@@ -168,9 +168,9 @@ class DeclarationStatement(Statement):
 @dataclass
 class LiteralExpression(Expression):
     """Literal value: 42, "hello", true"""
+    location: SourceLocation  # Inherited from Expression, must come first
     value: Any  # int, str, bool
     literal_type: str  # "Int", "String", "Boolean"
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"Literal({self.literal_type}: {repr(self.value)})"
@@ -179,8 +179,8 @@ class LiteralExpression(Expression):
 @dataclass
 class IdentifierExpression(Expression):
     """Variable reference: variableName"""
+    location: SourceLocation  # Inherited from Expression, must come first
     name: str
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"Identifier({self.name})"
@@ -189,10 +189,10 @@ class IdentifierExpression(Expression):
 @dataclass
 class BinaryExpression(Expression):
     """Binary operation: left operator right"""
+    location: SourceLocation  # Inherited from Expression, must come first
     left: Expression
     operator: str  # +, -, *, /, %, ==, !=, <, <=, >, >=, &&, ||
     right: Expression
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"Binary({self.left} {self.operator} {self.right})"
@@ -201,9 +201,9 @@ class BinaryExpression(Expression):
 @dataclass
 class UnaryExpression(Expression):
     """Unary operation: operator operand"""
+    location: SourceLocation  # Inherited from Expression, must come first
     operator: str  # -, !
     operand: Expression
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"Unary({self.operator}{self.operand})"
@@ -212,9 +212,9 @@ class UnaryExpression(Expression):
 @dataclass
 class CallExpression(Expression):
     """Function call: functionName(arguments)"""
+    location: SourceLocation  # Inherited from Expression, must come first
     function_name: str
     arguments: List[Expression]
-    location: SourceLocation
     
     def __repr__(self) -> str:
         args = ', '.join(str(arg) for arg in self.arguments)
@@ -224,9 +224,9 @@ class CallExpression(Expression):
 @dataclass
 class AssignmentExpression(Expression):
     """Assignment: target = value"""
+    location: SourceLocation  # Inherited from Expression, must come first
     target: str  # Variable name
     value: Expression
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"Assign({self.target} = {self.value})"
@@ -235,20 +235,34 @@ class AssignmentExpression(Expression):
 @dataclass
 class IfExpression(Expression):
     """If expression: if (condition) thenExpr else elseExpr"""
+    location: SourceLocation  # Inherited from Expression, must come first
     condition: Expression
     then_branch: Expression
     else_branch: Expression  # Required in expression form
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"IfExpr({self.condition} ? {self.then_branch} : {self.else_branch})"
 
 
 @dataclass
+class BlockExpression(Expression):
+    """Block expression: { statement1; statement2; lastExpr }
+    
+    In Kotlin, a block can be an expression. The value of the block
+    is the value of the last expression in the block.
+    """
+    location: SourceLocation  # Inherited from Expression, must come first
+    statements: List[Statement]
+    
+    def __repr__(self) -> str:
+        return f"BlockExpr({len(self.statements)} statements)"
+
+
+@dataclass
 class StringTemplateExpression(Expression):
     """String template: "text $variable more text" """
+    location: SourceLocation  # Inherited from Expression, must come first
     parts: List[Expression]  # Mix of LiteralExpression and other expressions
-    location: SourceLocation
     
     def __repr__(self) -> str:
         return f"StringTemplate({len(self.parts)} parts)"
