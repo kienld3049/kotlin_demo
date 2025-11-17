@@ -90,6 +90,8 @@ with st.sidebar:
     show_tokens = st.checkbox("Hiển thị Tokens", value=True)
     show_ast = st.checkbox("Hiển thị AST", value=True)
     show_symbols = st.checkbox("Hiển thị Symbol Table", value=True)
+    show_ir = st.checkbox("Hiển thị IR", value=True)
+    show_codegen = st.checkbox("Hiển thị Code Generation", value=True)
     show_output = st.checkbox("Hiển thị Output", value=True)
     
     st.divider()
@@ -107,7 +109,9 @@ with st.sidebar:
     1. 📝 Lexical Analysis
     2. 🌳 Syntax Analysis (Parsing)
     3. 🔍 Semantic Analysis
-    4. ⚡ Execution
+    4. 🔧 IR Generation
+    5. 🎯 Code Generation
+    6. ⚡ Execution
     """)
 
 # Main content - 2 columns
@@ -431,8 +435,6 @@ with col_right:
                     if func_data:
                         st.dataframe(pd.DataFrame(func_data), 
                                    use_container_width=True, hide_index=True)
-                else:
-                    st.info("Không có functions")
             
             with col2:
                 if variables:
@@ -447,8 +449,6 @@ with col_right:
                     if var_data:
                         st.dataframe(pd.DataFrame(var_data), 
                                    use_container_width=True, hide_index=True)
-                else:
-                    st.info("Không có variables")
                     
     elif not state.symbol_table:
         st.info("Chưa có Symbol Table. Nhấn 'Run' để phân tích.")
@@ -459,26 +459,127 @@ with col_right:
     st.markdown("""
         <div style='text-align: center; padding: 10px;'>
             <span style='font-size: 24px;'>⬇️</span><br>
-            <span style='color: #666; font-size: 12px;'>AST + Symbols được chuyển đến Interpreter</span>
+            <span style='color: #666; font-size: 12px;'>AST được chuyển đến IR Generator</span>
         </div>
     """, unsafe_allow_html=True)
     st.divider()
     
-    # ---- STEP 4: EXECUTION ----
-    st.subheader("⚡ Bước 4: Execution (Thực thi)")
+    # ---- STEP 4: IR GENERATION ----
+    st.subheader("🔧 Bước 4: IR Generation (Tạo mã trung gian)")
+    
+    if show_ir and state.ir_instructions:
+        with st.container():
+            st.markdown("""
+            <div class="info-box">
+                <strong>💡 Tại sao cần bước này?</strong><br>
+                IR (Intermediate Representation) là mã trung gian độc lập với nền tảng.<br>
+                Giúp dễ dàng sinh mã cho nhiều nền tảng khác nhau (JVM, JS, Native).
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.caption("📥 **Input:** Abstract Syntax Tree")
+            st.caption("⚙️ **Process:** AST → IR transformation")
+            st.caption(f"📤 **Output:** {len(state.ir_instructions)} IR instructions")
+            
+            # Display IR instructions
+            ir_text = []
+            for i, instr in enumerate(state.ir_instructions, 1):
+                ir_text.append(f"{i}. {instr}")
+            
+            st.code("\n".join(ir_text), language="text")
+            
+            st.metric("Số lượng IR instructions", len(state.ir_instructions))
+                    
+    elif not state.ir_instructions:
+        st.info("Chưa có IR. Nhấn 'Run' để sinh IR.")
+    else:
+        st.info("Bật 'Hiển thị IR' trong sidebar để xem")
+    
+    # Visual separator
+    st.markdown("""
+        <div style='text-align: center; padding: 10px;'>
+            <span style='font-size: 24px;'>⬇️</span><br>
+            <span style='color: #666; font-size: 12px;'>IR được chuyển đến Code Generators</span>
+        </div>
+    """, unsafe_allow_html=True)
+    st.divider()
+    
+    # ---- STEP 5: CODE GENERATION ----
+    st.subheader("🎯 Bước 5: Code Generation (Sinh mã đích)")
+    
+    if show_codegen and (state.jvm_code or state.js_code or state.native_code):
+        with st.container():
+            st.markdown("""
+            <div class="info-box">
+                <strong>💡 Tại sao cần bước này?</strong><br>
+                Từ IR, sinh mã cho các nền tảng cụ thể:<br>
+                • <strong>JVM Bytecode</strong>: Chạy trên Java Virtual Machine<br>
+                • <strong>JavaScript</strong>: Chạy trong browser/Node.js<br>
+                • <strong>Native Code</strong>: Chạy trực tiếp trên CPU
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.caption("📥 **Input:** IR Instructions")
+            st.caption("⚙️ **Process:** IR → Platform-specific code")
+            st.caption("📤 **Output:** JVM / JavaScript / Native code")
+            
+            # Tabs for different platforms
+            tab_jvm, tab_js, tab_native = st.tabs(["☕ JVM Bytecode", "🟨 JavaScript", "⚙️ Native Assembly"])
+            
+            with tab_jvm:
+                if state.jvm_code:
+                    st.markdown("**JVM Bytecode (Jasmin format)**")
+                    st.code(state.jvm_code, language="text")
+                else:
+                    st.info("Chưa có JVM bytecode")
+            
+            with tab_js:
+                if state.js_code:
+                    st.markdown("**JavaScript Code**")
+                    st.code(state.js_code, language="javascript")
+                else:
+                    st.info("Chưa có JavaScript code")
+            
+            with tab_native:
+                if state.native_code:
+                    st.markdown("**Native Assembly (x86-64)**")
+                    st.code(state.native_code, language="asm")
+                else:
+                    st.info("Chưa có Native assembly")
+                    
+    elif not (state.jvm_code or state.js_code or state.native_code):
+        st.info("Chưa có code generation. Nhấn 'Run' để sinh mã.")
+    else:
+        st.info("Bật 'Hiển thị Code Generation' trong sidebar để xem")
+    
+    # Visual separator
+    st.markdown("""
+        <div style='text-align: center; padding: 10px;'>
+            <span style='font-size: 24px;'>⬇️</span><br>
+            <span style='color: #666; font-size: 12px;'>AST được chuyển đến Interpreter để thực thi</span>
+        </div>
+    """, unsafe_allow_html=True)
+    st.divider()
+    
+    # ---- STEP 6: EXECUTION ----
+    st.subheader("⚡ Bước 6: Execution (Thực thi)")
     
     if show_output:
         with st.container():
             st.markdown("""
             <div class="info-box">
                 <strong>💡 Đây là bước cuối cùng!</strong><br>
-                Interpreter duyệt qua AST và thực thi từng câu lệnh.<br>
-                Kết quả được in ra console (output).
+                Demo sử dụng Tree-Walking Interpreter:<br>
+                • Duyệt qua AST và thực thi từng câu lệnh<br>
+                • Kết quả được in ra console (output)<br>
+                <br>
+                <strong>📝 Lưu ý:</strong> Generated code (JVM/JS/Native) ở Bước 5 
+                chỉ để minh họa, không được execute trong demo này.
             </div>
             """, unsafe_allow_html=True)
             
-            st.caption("📥 **Input:** AST + Symbol Table")
-            st.caption("⚙️ **Process:** Interpretation - thực thi từng node")
+            st.caption("📥 **Input:** Abstract Syntax Tree")
+            st.caption("⚙️ **Process:** Tree-walking interpretation")
             st.caption("📤 **Output:** Program output")
             
             if state.output:
