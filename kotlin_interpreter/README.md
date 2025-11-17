@@ -9,7 +9,9 @@ Project này implement một mini compiler + interpreter cho Kotlin, bao gồm:
 1. **Lexical Analysis** - Tokenization
 2. **Syntax Analysis** - AST construction
 3. **Semantic Analysis** - Type checking & symbol tables
-4. **Execution** - Interpretation với runtime model
+4. **IR Generation** - Intermediate representation ✨ NEW
+5. **Code Generation** - Multi-platform code generation ✨ NEW
+6. **Execution** - Interpretation với runtime model
 
 ## 🎯 Mục tiêu
 
@@ -36,7 +38,26 @@ brew install graphviz
 
 ## 💡 Sử dụng
 
-### Basic Usage
+### Web GUI (Recommended)
+
+```bash
+# Khởi động Streamlit web interface
+streamlit run streamlit_app.py
+# hoặc
+python -m streamlit run streamlit_app.py
+
+# Mở browser tại http://localhost:8501
+```
+
+**Tính năng Web GUI:**
+- 🎨 Interactive code editor
+- 📊 Visualize toàn bộ 6 phases của compilation
+- 🔧 Xem IR instructions
+- 🎯 Xem generated code cho JVM/JavaScript/Native
+- 📈 Symbol table và AST visualization
+- 🧪 Built-in example programs
+
+### CLI Usage
 
 ```bash
 # Chạy file Kotlin
@@ -93,19 +114,26 @@ kotlin_interpreter/
 │   │   ├── symbol_table.py      # Symbol management
 │   │   ├── type_system.py       # Type definitions
 │   │   ├── collection_pass.py   # Declaration collection
-│   │   └── type_checker_pass.py # Type checking
-│   ├── interpreter/     # Execution engine
+│   │   └── errors.py            # Semantic errors
+│   ├── ir/              # ✨ Intermediate Representation
+│   │   ├── ir_nodes.py          # IR instruction types
+│   │   └── ir_generator.py      # AST → IR transformer
+│   ├── codegen/         # ✨ Code Generation
+│   │   └── generators.py        # JVM/JS/Native generators
+│   ├── runtime/         # Execution engine
 │   │   ├── runtime_objects.py   # Kotlin object model
 │   │   ├── environment.py       # Runtime environment
 │   │   └── evaluator.py         # AST evaluator
-│   └── utils/           # Utilities
-│       ├── errors.py            # Error definitions
-│       ├── error_collector.py   # Error collection
-│       ├── visualizer.py        # AST visualization
-│       └── output_formatter.py  # Pretty printing
+│   └── gui/             # Web GUI components
+│       └── state_manager.py     # Streamlit state management
+├── docs/                # Documentation
+│   ├── ir_and_codegen_guide.md  # IR & CodeGen guide
+│   ├── interview_prep.md        # Interview preparation
+│   └── presentation_script.md   # Presentation script
 ├── tests/               # Test suite
 ├── examples/            # Kotlin example programs
-├── main.py             # Entry point
+├── main.py             # CLI entry point
+├── streamlit_app.py    # Web GUI entry point
 ├── requirements.txt    # Dependencies
 └── README.md
 ```
@@ -142,7 +170,17 @@ pytest tests/test_lexer.py -v
 ────────────────────────────────────────────────────────────
 ✅ Semantic analysis completed: No errors
 
-[PHASE 4] 🚀 EXECUTION
+[PHASE 4] 🔧 IR GENERATION ✨ NEW
+────────────────────────────────────────────────────────────
+✅ IR generated: 5 instructions
+
+[PHASE 5] 🎯 CODE GENERATION ✨ NEW
+────────────────────────────────────────────────────────────
+✅ JVM bytecode: 45 lines
+✅ JavaScript: 5 lines
+✅ Native assembly: 35 lines
+
+[PHASE 6] 🚀 EXECUTION
 ────────────────────────────────────────────────────────────
 ╔════════════════════════════════════════════════════════════╗
 ║                    PROGRAM OUTPUT                          ║
@@ -151,13 +189,52 @@ pytest tests/test_lexer.py -v
 ╚════════════════════════════════════════════════════════════╝
 ```
 
+## 🎯 New Features: IR & Code Generation
+
+### IR Generation
+Chuyển đổi AST thành platform-independent intermediate representation:
+- Simple 3-address code format
+- Easy to optimize và transform
+- Foundation cho multi-platform code generation
+
+**Example IR:**
+```
+1. a = 10
+2. b = 20
+3. temp0 = a + b
+4. c = temp0
+5. call println(c)
+```
+
+### Code Generation
+Sinh mã cho 3 nền tảng từ IR:
+
+1. **JVM Bytecode** (Jasmin format)
+   - Stack-based virtual machine
+   - Educational simulation of JVM instructions
+
+2. **JavaScript**
+   - Functional code có thể chạy trong browser/Node.js
+   - Register-based execution model
+
+3. **Native Assembly** (x86-64)
+   - Pseudo assembly code
+   - Direct CPU register manipulation
+
+Xem thêm: `docs/ir_and_codegen_guide.md`
+
 ## 🎓 Learning Resources
 
-Xem thêm trong `memory-bank/`:
-- `kotlin-interpreter-project.md` - Project overview
-- `kotlin-interpreter-architecture.md` - Technical architecture
-- `kotlin-interpreter-implementation.md` - Implementation guide
-- `kotlin-interpreter-demo-modes.md` - Demo modes & UX
+**Documentation:**
+- `docs/ir_and_codegen_guide.md` - IR & Code Generation guide
+- `docs/interview_prep.md` - Interview preparation guide
+- `docs/presentation_script.md` - Presentation script
+
+**Memory Bank:**
+- `memory-bank/kotlin-interpreter-project.md` - Project overview
+- `memory-bank/kotlin-interpreter-architecture.md` - Technical architecture
+- `memory-bank/kotlin-interpreter-implementation.md` - Implementation guide
+- `memory-bank/kotlin-interpreter-streamlit-gui.md` - GUI implementation
 
 ## 📝 License
 

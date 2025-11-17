@@ -19,6 +19,8 @@ from src.semantic.symbol_table import SymbolTable
 from src.semantic.errors import ErrorCollector
 from src.runtime.evaluator import Evaluator
 from src.runtime.environment import Environment
+from src.ir.ir_generator import IRGenerator
+from src.codegen.generators import JVMBytecodeGenerator, JavaScriptGenerator, NativeCodeGenerator
 
 
 @dataclass
@@ -28,6 +30,10 @@ class InterpreterState:
     tokens: List = field(default_factory=list)
     ast: Optional[Any] = None
     symbol_table: Optional[SymbolTable] = None
+    ir_instructions: List = field(default_factory=list)
+    jvm_code: str = ""
+    js_code: str = ""
+    native_code: str = ""
     output: str = ""
     errors: List[str] = field(default_factory=list)
     execution_steps: List[Dict] = field(default_factory=list)
@@ -68,13 +74,17 @@ class StateManager:
     def run_interpreter(source_code: str) -> Dict[str, Any]:
         """
         Chạy interpreter với source code
-        Returns dict với keys: success, tokens, ast, symbol_table, output, errors
+        Returns dict với keys: success, tokens, ast, symbol_table, ir_instructions, jvm_code, js_code, native_code, output, errors
         """
         result = {
             'success': False,
             'tokens': [],
             'ast': None,
             'symbol_table': None,
+            'ir_instructions': [],
+            'jvm_code': '',
+            'js_code': '',
+            'native_code': '',
             'output': '',
             'errors': []
         }
@@ -103,7 +113,22 @@ class StateManager:
             
             result['symbol_table'] = symbol_table
             
-            # Step 4: Execution
+            # Step 4: IR Generation
+            ir_generator = IRGenerator()
+            ir_instructions = ir_generator.generate(ast)
+            result['ir_instructions'] = ir_instructions
+            
+            # Step 5: Code Generation
+            jvm_generator = JVMBytecodeGenerator(ir_instructions)
+            result['jvm_code'] = jvm_generator.generate()
+            
+            js_generator = JavaScriptGenerator(ir_instructions)
+            result['js_code'] = js_generator.generate()
+            
+            native_generator = NativeCodeGenerator(ir_instructions)
+            result['native_code'] = native_generator.generate()
+            
+            # Step 6: Execution
             evaluator = Evaluator()
             
             # Capture output
@@ -127,6 +152,10 @@ class StateManager:
         state.tokens = result['tokens']
         state.ast = result['ast']
         state.symbol_table = result['symbol_table']
+        state.ir_instructions = result['ir_instructions']
+        state.jvm_code = result['jvm_code']
+        state.js_code = result['js_code']
+        state.native_code = result['native_code']
         state.output = result['output']
         state.errors = result['errors']
         
