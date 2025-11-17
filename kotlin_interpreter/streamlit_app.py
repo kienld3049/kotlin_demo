@@ -62,6 +62,10 @@ st.markdown("""
 StateManager.initialize()
 state = StateManager.get_state()
 
+# Initialize example counter for widget key management
+if 'example_counter' not in st.session_state:
+    st.session_state.example_counter = 0
+
 # Header
 st.markdown('<div class="main-header">🚀 Kotlin Interpreter Demo</div>', unsafe_allow_html=True)
 st.markdown("### Mô phỏng quá trình biên dịch và thực thi Kotlin từ A đến Z")
@@ -81,6 +85,7 @@ with st.sidebar:
     if selected_example != "-- Custom Code --":
         if st.button("📥 Load Example"):
             StateManager.update_source_code(examples[selected_example])
+            st.session_state.example_counter += 1  # Force widget recreation
             st.rerun()
     
     st.divider()
@@ -120,7 +125,7 @@ col_left, col_right = st.columns([1, 1])
 with col_left:
     st.header("📝 Source Code")
     
-    # Code editor
+    # Code editor with dynamic key to force recreation when loading examples
     source_code = st.text_area(
         "Nhập code Kotlin:",
         value=state.source_code,
@@ -128,8 +133,12 @@ with col_left:
         placeholder='''fun main() {
     println("Hello, World!")
 }''',
-        key="code_editor"
+        key=f"code_editor_{st.session_state.example_counter}"
     )
+    
+    # Sync state when user types
+    if source_code != state.source_code:
+        StateManager.update_source_code(source_code)
     
     # Buttons
     btn_col1, btn_col2 = st.columns(2)
