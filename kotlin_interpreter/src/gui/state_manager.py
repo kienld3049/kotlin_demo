@@ -47,13 +47,20 @@ class StateManager:
     def initialize():
         """Khởi tạo session state nếu chưa có"""
         if 'interpreter_state' not in st.session_state:
-            st.session_state.interpreter_state = InterpreterState()
+            # Khởi tạo với Hello World example làm default
+            default_code = '''fun main() {
+        println("Hello, World!")
+    }'''
+            st.session_state.interpreter_state = InterpreterState(
+                source_code=default_code  # ← Set default code
+            )
         
         if 'show_details' not in st.session_state:
             st.session_state.show_details = True
         
         if 'auto_run' not in st.session_state:
             st.session_state.auto_run = False
+
     
     @staticmethod
     def get_state() -> InterpreterState:
