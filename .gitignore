@@ -1,6 +1,7 @@
 # Source PDFs - Bản quyền (KHÔNG push lên GitHub)
 dokumen.pub_kotlin-in-action-2.pdf
 Saumont_The-Joy-of-Kotlin_RuLit_Me_670097.pdf
+memory-bank/
 
 # LaTeX auxiliary files
 *.aux
@@ -12,7 +13,11 @@ Saumont_The-Joy-of-Kotlin_RuLit_Me_670097.pdf
 *.fls
 *.fdb_latexmk
 *.synctex.gz
-
+*.tex
+*.pdf
+*.bbl
+*.aux
+*.md
 # Generated PDFs (output files)
 main.pdf
 kotlin_report.pdf
