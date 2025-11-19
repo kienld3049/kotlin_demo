@@ -17,7 +17,6 @@ memory-bank/
 *.pdf
 *.bbl
 *.aux
-*.md
 # Generated PDFs (output files)
 main.pdf
 kotlin_report.pdf
